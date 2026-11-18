@@ -1,0 +1,123 @@
+// Work in Progress GameControl class, version 1
+#include <iostream>
+using namespace std;
+
+class GameControl 
+{ 
+    // Important Variables 
+    private: 
+        int inning = 1;
+		bool topinning = true; 
+        int ballCount = 0;
+        int strikeCount = 0;
+        int outCount = 0;
+        int AwayScore = 0;
+        int HomeScore = 0;
+        bool Bases[3] = {false, false, false};
+public:
+    // Debug Tools
+    void setValues(int i = 0, int b = 0, int s = 0, int o = 0)
+    {
+        inning = i;
+        ballCount = b;
+        strikeCount = s;
+        outCount = o;
+    }
+    
+    void ClearBases()
+    {
+        Bases[0] = Bases[1] = Bases[2] = false;
+    }
+
+    void ResetCounts()
+    {
+        ballCount = 0;
+        strikeCount = 0;
+    }
+
+    void NextHalfInning()
+    {
+        outCount = 0;
+        ResetCounts();
+        ClearBases();
+      
+      if (topinning) 
+        {
+            topinning = false;
+        }
+        else 
+        {
+            topinning = true; inning++;
+        }
+    }
+
+    void recordStrike()
+    {
+        strikeCount++;
+        if (strikeCount >= 3)
+        {
+            recordOut();
+        }
+    }
+
+    void viewAll()
+    {
+        // cout << "Inning: " << inning << "\nBall Count: " << ballCount << "\nStrike Count: " << strikeCount
+           // << "\nOut Count: " << outCount << endl;
+        cout << "Inning: " << (topinning ? "Top " : "Bottom ")
+            << "Balls: " << ballCount 
+            << "Strikes: " << strikeCount 
+            << " Outs: " << outCount << endl;
+    }
+   
+    // Adds the ball on demand, but resets the score after four balls
+    void recordBall()
+    {
+        ballCount++;
+        if (ballCount >= 4)
+        {
+            ballCount = 0;
+            strikeCount = 0;
+        }
+    }
+
+    void recordOut()
+    {
+		ResetCounts();
+        outCount++;
+        // checks if three outs are reached, then goes to the next inning and resets the count 
+        if (outCount >= 3)
+        {
+            NextHalfInning();
+        }
+    }
+
+    // Adds strikes until it reaches two strikes
+    void handleFoul()
+    {
+        if (strikeCount < 2)
+        {
+            strikeCount++;
+        }
+    }
+
+    void resetGame()
+    {
+        inning = 1;
+        outCount = 0;
+        topinning = true;
+        ClearBases();
+        ResetCounts();
+    }
+};
+
+int main() 
+{
+    // Debug area
+    GameControl newGame;
+    newGame.setValues(1, 2, 3, 4);
+    newGame.viewAll();
+    newGame.resetGame();
+    newGame.viewAll();
+    return 0;
+}
