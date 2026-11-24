@@ -1,0 +1,211 @@
+#include <iostream>
+using namespace std;
+
+class GameControl 
+{ 
+    // Important Variables 
+    private: 
+        int inning = 1;
+        bool topInning = true;
+        int ballCount = 0;
+        int strikeCount = 0;
+        int outCount = 0;
+        int topPoints = 0;
+        int bottomPoints = 0;
+        bool Bases[3] = {false, false, false};
+
+public:
+    // Debug Tools
+    void setValues(int i = 0, int b = 0, int s = 0, int o = 0, int tp = 0, int bp = 0)
+    {
+        inning = i;
+        ballCount = b;
+        strikeCount = s;
+        outCount = o;
+        topPoints = tp;
+        bottomPoints = bp;
+    }
+    // Helps in adjusting bases, also doubles as a resetBases() method
+    void setBases(bool base1 = false, bool base2 = false, bool base3 = false)
+    {
+        Bases[0] = base1;
+        Bases[1] = base2;
+        Bases[2] = base3;
+    }
+
+    void viewAll()
+    {
+        cout << "\ninning: " << inning << "   top inning?: " << topInning;
+        cout << "\nball count: " << ballCount << "   strike count: " << strikeCount << "   out count: " << outCount;
+        cout << "\nTop points: " << topPoints << "bottom points: " << bottomPoints;
+        cout << "\nBases 1-3: " << Bases[0] << " " << Bases[1] << " " << Bases[2] << endl;
+    }
+   // end of Debug Tools
+    // Adds the ball on demand, but resets the score after four balls
+    void recordBall()
+    {
+        ballCount++;
+        if (ballCount >= 4)
+        {
+            ballCount = 0;
+            strikeCount = 0;
+            advanceForceRunners();
+        }
+    }
+
+    // Adds a strike on demand, then makes changes based on the game state
+    void recordStrike()
+    {
+        strikeCount++;
+        if (strikeCount >= 3 && outCount < 2) // third strike and 1st or 2nd out
+        {
+            outCount++;
+            strikeCount = 0;
+        }
+        else if (strikeCount >= 3 && outCount >= 2) // third strike and 3rd out
+        {
+            strikeCount = 0;
+            outCount = 0;
+            setBases();
+            if (topInning = false)
+            {
+                inning++;
+                topInning = true;
+            }
+            else
+            {
+                topInning = false;
+            }
+        }
+    }
+
+    // Adds an out on demand, then makes changes based on game state (mainly for the batter)
+    void recordOut()
+    {
+        outCount++;
+        // checks if three outs are reached, then goes to the next inning and resets the count 
+        if (outCount >= 3)
+        {
+            outCount = 0;
+            ballCount = 0;
+            setBases();
+            if (topInning = false)
+            {
+                inning++;
+                topInning = true;
+            }
+            else
+            {
+                topInning = false;
+            }
+        }
+    }
+
+    // Alternative to adding an out, mainly for the players on bases getting striked out
+    void recordOut(int PlayerBaseLocation)
+    {
+        Bases[PlayerBaseLocation - 1] = false;
+        outCount++;
+        if (outCount >= 3)
+        {
+            outCount = 0;
+            ballCount = 0;
+            setBases();
+            if (topInning = false)
+            {
+                inning++;
+                topInning = true;
+            }
+            else
+            {
+                topInning = false;
+            }
+            
+        }
+    }
+
+    // Adds strikes until it reaches two strikes
+    void handleFoul()
+    {
+        if (strikeCount < 2)
+        {
+            strikeCount++;
+        }
+    }
+
+    void advanceForceRunners(bool homeRun = false)
+    {
+        if (homeRun = false)
+        {
+            // bases are loaded, bases 1 and 2 are loaded, base 1 is loaded, base 1 is empty
+            if (Bases[0] = Bases[1] = Bases[2] = true)
+            {
+                if (topInning = true)
+                {
+                    topPoints++;
+                }
+                else if (topInning = false)
+                {
+                    bottomPoints++;
+                }
+            }
+            else if (Bases[0] = Bases[1] = true)
+            {
+                Bases[2] = true;
+            }
+            else if (Bases[0] = true)
+            {
+                Bases[1] = true;
+            }
+            else
+            {
+                Bases[0] = true;
+            }
+            
+        }
+        else if (homeRun = true)
+        {
+            if (topInning = true)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Bases[i] = true)
+                    {
+                        topPoints++;
+                    }
+                }
+                topPoints++;
+            }
+            else if (topInning = false)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (Bases[i] = true)
+                    {
+                        bottomPoints++;
+                    }
+                }
+                bottomPoints++;
+            }
+            homeRun = false;
+        }
+    }
+
+    void resetGame()
+    {
+        inning = 1;     topInning = true;
+        ballCount = 0;
+        strikeCount = 0;
+        outCount = 0;
+        topPoints = 0;  bottomPoints = 0;
+        setBases();
+    }
+};
+
+int main() 
+{
+    // Debug area
+    GameControl newGame;
+    newGame.resetGame();
+    return 0;
+}
