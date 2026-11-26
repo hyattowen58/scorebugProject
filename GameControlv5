@@ -1,0 +1,191 @@
+#include <iostream>
+using namespace std;
+
+class GameControl 
+{ 
+private:
+    int inning = 1;
+    bool topInning = true;
+    int ballCount = 0;
+    int strikeCount = 0;
+    int outCount = 0;
+    bool Bases[3] = {false, false, false};
+    int topPoints = 0;
+    int bottomPoints = 0;
+
+public:
+    void recordBall()
+    {
+        // Adds a ball, every four balls causes a shift to bases by 1
+        ballCount++;
+        if (ballCount >= 4)
+        {
+            advanceForceRunners();
+            ballCount = 0;
+        }
+    }
+
+    void recordStrike()
+    {
+        // Adds a strike, every three strikes is an out
+        strikeCount++;
+        if (strikeCount > 2)
+        {
+            recordOut();
+            strikeCount = 0;
+        }
+    }
+    void recordOut()
+    {
+        // adds an out, three outs causes an inning transition
+        outCount++;
+        if (outCount > 2)
+        {
+            triggerInningTransition();
+        }
+        else
+        {
+            ballCount = 0;
+            strikeCount = 0;
+        }
+    }
+    void recordOut(int basePosition)
+    {
+        // adds an out that's not caused by the batter, same rules as regular recordOut
+        Bases[basePosition - 1] = false;
+        recordOut();
+    }
+    void handleFoul()
+    {
+        // adds an strike, unless the batter already has 2 stikes
+        if (strikeCount < 2)
+        {
+            strikeCount++;
+        }
+    }
+    void advanceForceRunners(bool homeRun = false)
+    {
+        // Operates the bases for forced bases movement
+        if (homeRun == false)
+        {
+            if (Bases[0] == true && Bases[1] == true && Bases[2] == true)   // All bases are loaded
+            {
+                if (topInning == true)
+                {
+                    topPoints++;
+                }
+                else if (topInning == false)
+                {
+                    bottomPoints++;
+                }
+            }
+            else if (Bases[0] == true && Bases[1] == true)                  // Bases 1 and 2 are loaded
+            {
+                Bases[2] = true;
+            }
+            else if (Bases[0] == true)                                      // Base 1 is loaded
+            {
+                Bases[1] = true;
+            }
+            else if (Bases[0] == false)                                     // Base 1 is empty
+            {
+                Bases[0] = true;
+            }
+            else
+            {
+                cout << "Error, please tell Aldrine";
+            }
+            ballCount = 0;
+            strikeCount = 0;
+        }
+        else if (homeRun == true)
+        {
+            int p = 1;
+            for (int i = 0; i < 3; i++)
+            {
+                if (Bases[i] == true)
+                {
+                    p++;
+                }
+            }
+            
+            if (topInning == true)
+            {
+                topPoints = topPoints + p;
+            }
+            else if (topInning == false)
+            {
+                bottomPoints = bottomPoints + p;
+            }
+
+            setBases();
+        }
+    }
+    void resetGame()
+    {
+        setValues();
+    }
+    void setBases(bool base1 = false, bool base2 = false, bool base3 = false, bool mistake = false)
+    {
+        // allows for changes in base positions, also acts as a resetBases() by default
+        // new: new default works for runners who cross multiple bases. New option to fix errors
+        if (mistake == false)
+        {
+            Bases[0] = base1;
+            Bases[1] = base2;
+            Bases[2] = base3;
+            ballCount = 0;
+            strikeCount = 0;
+        }
+        else if (mistake == true)
+        {
+            Bases[0] = base1;
+            Bases[1] = base2;
+            Bases[2] = base3;
+        }
+        
+    }
+// private:         // make this public if you want to test this program
+    void viewAll()
+    {
+        cout << "\nInning: " << inning << " Top Inning?: " << topInning << endl;
+        cout << "Ball: " << ballCount << " Strike Count: " << strikeCount << " Out Count: " << outCount << endl;
+        cout << "Bases: " << Bases[0] << " " << Bases[1] << " " << Bases[2] << endl;
+        cout << "Top Inning Points: " << topPoints << " Bottom Inning Points: " << bottomPoints << endl;
+    }
+    void setValues(int i = 1, bool ti = true, int b = 0, int s = 0, int o = 0, int tp = 0, int bp = 0, bool base1 = false, bool base2 = false, bool base3 = false)
+    {
+        inning = i;
+        topInning = ti;
+        ballCount = b;
+        strikeCount = s;
+        outCount = o;
+        topPoints = tp;
+        bottomPoints = bp;
+        Bases[0] = base1;   Bases[1] = base2;   Bases[2] = base3;
+    }
+    void triggerInningTransition()
+    {
+        // clear balls, strikes, outs, bases, and switch to other team
+        ballCount = 0;
+        strikeCount = 0;
+        outCount = 0;
+        setBases();
+        if (topInning == true)
+        {
+            topInning = false;
+        }
+        else if (topInning == false)
+        {
+            inning++;
+            topInning = true;
+        }
+    }
+};
+
+int main() 
+{
+    GameControl newGame;
+    newGame.resetGame();
+    newGame.viewAll();
+}
